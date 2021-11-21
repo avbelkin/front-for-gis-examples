@@ -1,0 +1,51 @@
+﻿<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="https://gis.extremum.org/lib/leaflet/dist/leaflet.css" />
+    <script src="https://gis.extremum.org/lib/leaflet/dist/leaflet.js"></script>
+    <script src="https://gis.extremum.org/lib/leaflet.gis.extensions/TileLayerSvg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/superagent"></script>
+    <link rel="stylesheet" href="https://gis.extremum.org/css/generic.css" />
+</head>
+<body style="margin: 0">
+    <div id="pagecontent" style="margin: 0">
+        <div id="map" style="height: 100%"></div>
+    </div>
+    <script>
+    var gisPropertiesPopupWindow = null;
+
+    var map = L.map('map', {
+        center: [57, 73],
+        zoom: 4,
+        zoomDelta: 1,
+        zoomSnap: 1,
+        zoomControl: !L.Browser.mobile,
+        layers: [
+            L.tileLayer('https://tile-{s}.opentopomap.ru/{z}/{x}/{y}.png', { id: 'oTopo', maxNativeZoom: 18, shortcut: 'KeyO' }),
+            L.tileLayer.svg('https://layers.extremum.org/v2/selector/strelki/{z}/{x}/{y}.svg?tileSize=2048', { id: 'strE', shortcut: 'KeyS', tileSize: 2048 })
+        ],
+        contextmenu: false
+    });
+
+    var scaleControl = new L.Control.Scale({ maxWidth: 200, imperial: false }).addTo(map);
+    map.once('viewreset', map.eachLayer(function(l) { l.redraw() }));
+    map.on("click", function (e) {
+        try {
+            const hyperlink = e.originalEvent.target.attributes["hyperlink"];
+            if (hyperlink) {
+                if (gisPropertiesPopupWindow)
+                    gisPropertiesPopupWindow.close();
+                gisPropertiesPopupWindow = window.open('about:blank', '_blank', `width=600,height=${window.innerHeight},location=yes`);
+                if (gisPropertiesPopupWindow) {
+                    gisPropertiesPopupWindow.location = hyperlink.value;
+                    gisPropertiesPopupWindow.onblur = function (ev) {
+                        this.close();
+                        gisPropertiesPopupWindow = null;
+                    };
+                }
+            }
+        } catch (exception) { }
+    });
+    </script>
+</body>
+</html>
